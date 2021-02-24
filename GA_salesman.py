@@ -72,7 +72,7 @@ def partial_crossover(parent1, parent2):
         child2[exchange_index2] = target_value2
     return child1, child2
 
-# 突然変異（転座）
+# 突然変異（転座）  ランダムで選んだ２要素を交換する
 def translocation_mutation(genes, num_mutation, p_value):
     mutated_genes = genes
     for i in range(num_mutation):
@@ -102,30 +102,35 @@ def show_route(cities, genes):
 
 #################
 # 実行部
-num_cities = 20
-indivisuals = 21
-#generation = 10000
+num_cities = 20     # 都市数
+indivisuals = 21    # 個体数
+#generation = 10000 # 世代数
 generation = 1000
-elite = 9
-p_mutation = 0.005
+elite = 9           # エリート選択数
+p_mutation = 0.005  # 突然変異の発生確率
 
 cities = generate_rand_cities(num_cities)
+# 初期個体生成
 genes = generate_init_genes(indivisuals, num_cities)
 show_cities(cities)
 
 top_indivisual=[]
 max_fit = 0
-for i in range(generation):
+for i in range(generation):  # 世代数が一定に達したら終了
+    # genes_pathが評価関数(経路が短いほど良い)
     fitness_vec = np.reciprocal(genes_path(genes, cities))
     child = np.zeros(np.shape(genes))
     for j in range(int((indivisuals-elite)/2)):
+        # 選択（淘汰）
         parents_indices = roulette_choice(fitness_vec)
+        # 交叉（部分的交叉）
         child[2*j], child[2*j+1] = partial_crossover(genes[parents_indices[0]], 
                                                      genes[parents_indices[1]])
     
     for j in range(indivisuals-elite, indivisuals):
         child[j] = genes[np.argsort(fitness_vec)[j]]
 
+    # 突然変異
     child = translocation_mutation(child, indivisuals-elite, p_mutation)
     top_indivisual.append(max(fitness_vec))
     genes = child
